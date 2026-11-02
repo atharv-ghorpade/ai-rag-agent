@@ -107,8 +107,57 @@ class RAGGenerator:
             pass
         return None
 
+    @staticmethod
+    def _clean_item_text(s: str) -> str:
+        """Strips leading list numbers, bullets, brackets, and collapses internal spaces."""
+        if not s:
+            return ""
+        # Strip leading punctuation, bullets, dashes
+        s = re.sub(r"^[\s\.\:\,\-•\*\>\–\—]+", "", s).strip()
+        # Strip leading list numbers like 1., 2), a., (1), [1], etc.
+        s = re.sub(r"^(\(?\d+[\.\)]|\(?[a-zA-Z][\.\)]|[•\-\*\>\–\—])\s*", "", s).strip()
+        # Strip trailing orphan list numbers or page references (e.g. \n2 or space 2 at end)
+        s = re.sub(r"[\s\n]+\d+\.?$", "", s).strip()
+        # Strip trailing colons or noise
+        s = re.sub(r"[:\s]+$", "", s).strip()
+        # Collapse multiple whitespaces
+        s = re.sub(r"\s+", " ", s).strip()
+        return s
+
+    @staticmethod
+    def _is_header_or_noise(s: str) -> bool:
+        """Returns True if the line is an uppercase section header or noise."""
+        lower = s.lower().strip()
+        if lower.startswith(("page ", "page-", "bytes", "http", "www", "tel", "email", "sub :", "ref :", "newsletter")):
+            return True
+        words = s.split()
+        if len(words) <= 8 and (s.isupper() or s.rstrip(":").isupper() or s.endswith(":")):
+            return True
+        return False
+
+    @staticmethod
+    def _extract_first_sentence(text: str) -> str:
+        """Extracts one complete direct sentence without lone numbers or abbreviations."""
+        cleaned = RAGGenerator._clean_item_text(text)
+        # Search for first sentence of at least 20 chars ending with a period followed by space or end
+        m = re.search(r"^(.{20,}?[a-zA-Z]{3}\.)(?:\s+|$)", cleaned)
+        if m:
+            return m.group(1).strip()
+        if not cleaned.endswith("."):
+            cleaned += "."
+        return cleaned
+
+    @staticmethod
+    def _format_summary_point(text: str, max_words: int = 18) -> str:
+        """Formats a summary bullet without word truncation and without list digits."""
+        cleaned = RAGGenerator._clean_item_text(text).rstrip(".")
+        words = cleaned.split()
+        if len(words) > max_words:
+            cleaned = " ".join(words[:max_words])
+        return f"- {cleaned}."
+
     def _format_sources(self, retrieved_chunks: List[Dict[str, Any]]) -> str:
-        """Formats clean deduplicated source citations list."""
+        """Formats clean deduplicated source citations list with markdown bullets."""
         seen = set()
         source_lines = []
         for c in retrieved_chunks:
@@ -117,22 +166,20 @@ class RAGGenerator:
             pair = (src, pg)
             if pair not in seen:
                 seen.add(pair)
-                source_lines.append(f"• {src} — Page {pg}")
-        return "\n".join(source_lines) if source_lines else "• Document — Page 1"
+                source_lines.append(f"- {src} — Page {pg}")
+        return "\n".join(source_lines) if source_lines else "- Institutional Document Repository — Page 1"
 
-    def _build_details_table_or_bullets(self, query: str, text: str) -> str:
+    def _build_details_table_or_bullets(
+        self,
+        query: str,
+        text: str,
+        extracted_sentences: Optional[List[str]] = None
+    ) -> str:
         """
         Builds a clean markdown table if numbers/statistics are involved, otherwise bullet points.
         Special rules: fees, dates, marks, seat intake, admissions, vacancies, statistics, percentages, approval reports.
         """
         combined = (query + " " + text).lower()
-        table_keywords = [
-            "fee", "fees", "date", "dates", "deadline", "mark", "marks", "score",
-            "percent", "%", "intake", "seat", "seats", "admission", "admissions",
-            "vacancy", "vacancies", "statistic", "statistics", "approval", "approved",
-            "sanctioned", "cap", "acap", "il", "stipend", "salary"
-        ]
-        
         rows = []
         
         # 1. Fees & Currency
@@ -197,10 +244,29 @@ class RAGGenerator:
                     table_str += f"| {k} | {v} |\n"
             return table_str.strip()
 
-        # Fallback to key facts in bullet points
-        sentences = [s.strip() for s in text.split(". ") if len(s.strip()) > 15]
-        if sentences:
-            return "\n".join(f"- {s.rstrip('.')}." for s in sentences[:3])
+        # Fallback to key facts in bullet points from clean extracted lines
+        candidate_items = list(extracted_sentences) if extracted_sentences else []
+        if not candidate_items:
+            for line in text.split("\n"):
+                cl = self._clean_item_text(line)
+                if len(cl) >= 20 and not self._is_header_or_noise(cl):
+                    candidate_items.append(cl)
+
+        bullets = []
+        seen_bullets = set()
+        for item in candidate_items:
+            cl = self._clean_item_text(item)
+            if len(cl) < 20 or self._is_header_or_noise(cl):
+                continue
+            cl = cl.rstrip(".:,; ") + "."
+            if cl not in seen_bullets:
+                seen_bullets.add(cl)
+                bullets.append(f"- {cl}")
+            if len(bullets) >= 4:
+                break
+
+        if bullets:
+            return "\n".join(bullets)
         return "- Verified institutional policy and administrative records."
 
     def _extractive_synthesis(
@@ -223,12 +289,10 @@ class RAGGenerator:
             top_qa = matched_qa[0]
             ans = top_qa.get("answer", "").strip()
             target_doc = top_qa.get("document", "Document.pdf")
-            combined_context = ans + " " + " ".join(c.get("raw_text", c.get("text", "")) for c in retrieved_chunks[:2])
+            combined_context = ans + "\n" + "\n".join(c.get("raw_text", c.get("text", "")) for c in retrieved_chunks[:2])
             
             # Direct answer in one sentence
-            direct_answer = ans.strip()
-            if not direct_answer.endswith("."):
-                direct_answer += "."
+            direct_answer = self._extract_first_sentence(ans)
 
             details_section = self._build_details_table_or_bullets(query, combined_context)
             
@@ -241,7 +305,7 @@ class RAGGenerator:
                 f"## Answer\n{direct_answer}\n\n"
                 f"## Details\n{details_section}\n\n"
                 f"## Summary\n" + "\n".join(summary_points) + f"\n\n"
-                f"## Sources\n• {target_doc} — Page 1"
+                f"## Sources\n- {target_doc} — Page 1"
             )
 
         # 2. Check for empty context
@@ -255,7 +319,7 @@ class RAGGenerator:
                 "- Information unavailable in uploaded documents.\n"
                 "- No matching policies or records indexed.\n\n"
                 "## Sources\n"
-                "• Institutional Document Repository — Page 1"
+                "- Institutional Document Repository — Page 1"
             )
 
         # 3. Check for unmentioned or low-confidence / irrelevant queries
@@ -275,7 +339,7 @@ class RAGGenerator:
                 "- Information unavailable in uploaded documents.\n"
                 "- No verified institutional records found.\n\n"
                 "## Sources\n"
-                "• Institutional Document Repository — Page 1"
+                "- Institutional Document Repository — Page 1"
             )
 
         # 4. Synthesize from retrieved chunks
@@ -286,40 +350,45 @@ class RAGGenerator:
             raw = chunk.get("raw_text", chunk.get("text", "")).strip()
             raw_clean = re.sub(r"^\[.*?\]\n?", "", raw).strip()
             all_raw_text.append(raw_clean)
-            lines = [l.strip() for l in raw_clean.split("\n") if len(l.strip()) > 20]
+            lines = [l.strip() for l in raw_clean.split("\n") if len(l.strip()) > 15]
             for line in lines:
-                cleaned_line = re.sub(r"^[\s\.\:\,\-•]+", "", line).strip()
+                cleaned_line = self._clean_item_text(line)
                 if (
-                    len(cleaned_line) > 25
-                    and not cleaned_line.lower().startswith(("page", "bytes", "http", "www", "tel", "email", "sub :", "ref :"))
+                    len(cleaned_line) >= 20
+                    and not self._is_header_or_noise(cleaned_line)
                     and cleaned_line not in lead_sentences
                 ):
                     lead_sentences.append(cleaned_line)
-                    if len(lead_sentences) >= 4:
+                    if len(lead_sentences) >= 6:
                         break
-            if len(lead_sentences) >= 4:
+            if len(lead_sentences) >= 6:
                 break
 
-        combined_corpus = " ".join(all_raw_text)
+        combined_corpus = "\n".join(all_raw_text)
         
         # Rule 1: First answer the user's question directly in one sentence
         lead = lead_sentences[0] if lead_sentences else "Relevant verified details were extracted from official documentation."
-        match = re.search(r"^.*?(?<=[a-z0-9\)])\.(?=\s+[A-Z]|$)", lead)
-        direct_sentence = match.group(0).strip() if match else lead.strip()
-        if not direct_sentence.endswith("."):
-            direct_sentence += "."
+        direct_sentence = self._extract_first_sentence(lead)
 
         # Rule 3: Then provide supporting details
-        details_table_or_bullets = self._build_details_table_or_bullets(query, combined_corpus)
-        supporting_notes = " ".join(lead_sentences[1:3]).strip()
-        if supporting_notes and details_table_or_bullets.startswith("|"):
-            details_section = f"{supporting_notes}\n\n{details_table_or_bullets}"
+        details_table_or_bullets = self._build_details_table_or_bullets(
+            query, 
+            combined_corpus, 
+            extracted_sentences=lead_sentences
+        )
+        
+        if details_table_or_bullets.startswith("|"):
+            supporting_notes = " ".join(lead_sentences[1:3]).strip()
+            if supporting_notes:
+                details_section = f"{supporting_notes}\n\n{details_table_or_bullets}"
+            else:
+                details_section = details_table_or_bullets
         else:
             details_section = details_table_or_bullets
 
         # Rule Output Format: Summary with Point 1 and Point 2
-        p1 = f"- {lead_sentences[1][:90].rstrip('.')}." if len(lead_sentences) > 1 else f"- {direct_sentence[:90].rstrip('.')}."
-        p2 = f"- {lead_sentences[2][:90].rstrip('.')}." if len(lead_sentences) > 2 else "- Verified against official institutional records."
+        p1 = self._format_summary_point(lead_sentences[1]) if len(lead_sentences) > 1 else self._format_summary_point(direct_sentence)
+        p2 = self._format_summary_point(lead_sentences[2]) if len(lead_sentences) > 2 else "- Verified against official institutional records."
 
         return (
             f"## Answer\n{direct_sentence}\n\n"

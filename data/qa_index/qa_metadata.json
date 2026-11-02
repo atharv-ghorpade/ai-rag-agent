@@ -918,5 +918,165 @@
     "category": "admissions",
     "difficulty": "easy",
     "document": "Institute_Level_Admissions_Policy.pdf"
+  },
+  {
+    "id": 116,
+    "question": "What are the Against CAP (ACAP) vacancies for First Year Engineering in A.Y. 2026-27?",
+    "answer": "There are 0 ACAP vacancies across all branches (Information Technology, Computer Engineering, Electronics and Computer Science, Electronics & Telecommunication Engineering, and Biomedical Engineering) for A.Y. 2026-27.",
+    "category": "admissions",
+    "difficulty": "easy",
+    "document": "First_Year_Engineering_2026-27_ACAP_and_IQ_Vacancies.pdf"
+  },
+  {
+    "id": 117,
+    "question": "What are the Institute Quota (IQ) vacancies for First Year Engineering in A.Y. 2026-27?",
+    "answer": "There are 0 Institute Quota (IQ) vacancies across all branches for First Year Engineering in A.Y. 2026-27.",
+    "category": "admissions",
+    "difficulty": "easy",
+    "document": "First_Year_Engineering_2026-27_ACAP_and_IQ_Vacancies.pdf"
+  },
+  {
+    "id": 118,
+    "question": "What is the date of the vacancy notification for First Year Engineering 2026-27 ACAP and Institute Quota seats?",
+    "answer": "The vacancy notification for First Year Engineering ACAP and Institute Quota seats was issued on 14 September 2026.",
+    "category": "admissions",
+    "difficulty": "easy",
+    "document": "First_Year_Engineering_2026-27_ACAP_and_IQ_Vacancies.pdf"
+  },
+  {
+    "id": 119,
+    "question": "Who secured Merit Rank 1 in the OMS Institute Quota (IQ) merit list for First Year Engineering 2026-27?",
+    "answer": "Aman Kumar (Application ID: EN26425391) secured Merit Rank 1 with a 99.9572998 MH-CET total percentile.",
+    "category": "admissions",
+    "difficulty": "easy",
+    "document": "Merit_List_OMS_IQ_Seats_2026-27.pdf"
+  },
+  {
+    "id": 120,
+    "question": "Who secured Merit Rank 2 in the OMS Institute Quota (IQ) merit list for First Year Engineering 2026-27?",
+    "answer": "Aryan Kumar Jaiswal (Application ID: EN26308311) secured Merit Rank 2 with a 98.3243876 MH-CET total percentile.",
+    "category": "admissions",
+    "difficulty": "easy",
+    "document": "Merit_List_OMS_IQ_Seats_2026-27.pdf"
+  },
+  {
+    "id": 121,
+    "question": "Who secured Merit Rank 3 in the OMS Institute Quota (IQ) merit list for First Year Engineering 2026-27?",
+    "answer": "Aman Ali Ishrat Ali (Application ID: EN26320883) secured Merit Rank 3 with a 98.1552237 MH-CET total percentile.",
+    "category": "admissions",
+    "difficulty": "easy",
+    "document": "Merit_List_OMS_IQ_Seats_2026-27.pdf"
+  },
+  {
+    "id": 122,
+    "question": "How many candidates are listed in the OMS Institute Quota (IQ) merit list for First Year Engineering 2026-27?",
+    "answer": "There are 225 candidates listed in the OMS Institute Quota (IQ) merit list, ranging from 99.9572998 to 5.1774267 percentile.",
+    "category": "admissions",
+    "difficulty": "medium",
+    "document": "Merit_List_OMS_IQ_Seats_2026-27.pdf"
+  },
+  {
+    "id": 123,
+    "question": "Who secured Merit Rank 1 in the OMS Against CAP (ACAP) merit list for First Year Engineering 2026-27?",
+    "answer": "Aman Kumar (Application ID: EN26425391) secured Merit Rank 1 with a 99.9572998 PCM CET percentile.",
+    "category": "admissions",
+    "difficulty": "easy",
+    "document": "Merit_List_OMS_ACAP_Seats_2026-27.pdf"
+  },
+  {
+    "id": 124,
+    "question": "How many candidates are listed in the OMS Against CAP (ACAP) merit list for First Year Engineering 2026-27?",
+    "answer": "There are 265 candidates listed in the OMS Against CAP (ACAP) merit list for First Year Engineering A.Y. 2026-27.",
+    "category": "admissions",
+    "difficulty": "medium",
+    "document": "Merit_List_OMS_ACAP_Seats_2026-27.pdf"
+  },
+  {
+    "id": 125,
+    "question": "Who secured Merit Rank 1 in the All India Quota JEE merit list for First Year Engineering 2025-26?",
+    "answer": "Kashid Aditya Ramchandra (Application ID: EN26280055) secured Merit Rank 1 with a 99.4585176 JEE total percentile.",
+    "category": "admissions",
+    "difficulty": "easy",
+    "document": "Merit_List_All_India_Quota_Seats_2025-26.pdf"
+  },
+  {
+    "id": 126,
+    "question": "Who secured Merit Rank 2 in the All India Quota JEE merit list for First Year Engineering 2025-26?",
+    "answer": "Parnavi Yogesh Wani (Application ID: EN26327733) secured Merit Rank 2 with a 99.0786301 JEE total percentile.",
+    "category": "admissions",
+    "difficulty": "easy",
+    "document": "Merit_List_All_India_Quota_Seats_2025-26.pdf"
+  },
+  {
+    "id": 127,
+    "question": "Who secured Merit Rank 3 in the All India Quota JEE merit list for First Year Engineering 2025-26?",
+    "answer": "Jayaditya Choudhary (Application ID: EN26157620) secured Merit Rank 3 with a 98.9202841 JEE total percentile.",
+    "category": "admissions",
+    "difficulty": "easy",
+    "document": "Merit_List_All_India_Quota_Seats_2025-26.pdf"
+  },
+  {
+    "id": 128,
+    "question": "How many candidates are listed in the All India Quota JEE merit list for First Year Engineering 2025-26?",
+    "answer": "There are 3,319 candidates listed in the All India Quota JEE merit list across 75 pages.",
+    "category": "admissions",
+    "difficulty": "medium",
+    "document": "Merit_List_All_India_Quota_Seats_2025-26.pdf"
+  },
+  {
+    "id": 129,
+    "question": "Who secured Merit Rank 1 in the Maharashtra State Institute Quota (MS-CET) merit list for First Year Engineering 2026-27?",
+    "answer": "Ishant Rajendra Gawali (Application ID: EN26248469) secured Merit Rank 1 with a 99.7632080 PCM CET percentile.",
+    "category": "admissions",
+    "difficulty": "easy",
+    "document": "Merit_List_Institute_Quota_Seats_MS-CET_2026-27.pdf"
+  },
+  {
+    "id": 130,
+    "question": "Who secured Merit Rank 2 in the Maharashtra State Institute Quota (MS-CET) merit list for First Year Engineering 2026-27?",
+    "answer": "Mohak Kamal Sethiya (Application ID: EN26364527) secured Merit Rank 2 with a 99.7610922 PCM CET percentile.",
+    "category": "admissions",
+    "difficulty": "easy",
+    "document": "Merit_List_Institute_Quota_Seats_MS-CET_2026-27.pdf"
+  },
+  {
+    "id": 131,
+    "question": "Who secured Merit Rank 3 in the Maharashtra State Institute Quota (MS-CET) merit list for First Year Engineering 2026-27?",
+    "answer": "Parnavi Yogesh Wani (Application ID: EN26327733) secured Merit Rank 3 with a 99.5929444 PCM CET percentile.",
+    "category": "admissions",
+    "difficulty": "easy",
+    "document": "Merit_List_Institute_Quota_Seats_MS-CET_2026-27.pdf"
+  },
+  {
+    "id": 132,
+    "question": "How many candidates are listed in the Maharashtra State Institute Quota (MS-CET) merit list for First Year Engineering 2026-27?",
+    "answer": "There are 4,571 candidates listed in the Maharashtra State Institute Quota (MS-CET) merit list across 101 pages.",
+    "category": "admissions",
+    "difficulty": "medium",
+    "document": "Merit_List_Institute_Quota_Seats_MS-CET_2026-27.pdf"
+  },
+  {
+    "id": 133,
+    "question": "What was the application cutoff date considered for the First Year Engineering 2026-27 merit lists?",
+    "answer": "Applications received up to 7 September 2026 were considered in the merit lists.",
+    "category": "admissions",
+    "difficulty": "easy",
+    "document": "Merit_List_Institute_Quota_Seats_MS-CET_2026-27.pdf"
+  },
+  {
+    "id": 134,
+    "question": "What confirmation is mandatory to participate in Institute Level (IL) admissions?",
+    "answer": "SC confirmation and acknowledgement is mandatory to participate in the Institute Level (IL) admissions.",
+    "category": "admissions",
+    "difficulty": "easy",
+    "document": "Merit_List_Institute_Quota_Seats_MS-CET_2026-27.pdf"
+  },
+  {
+    "id": 135,
+    "question": "What is the mission of the department?",
+    "answer": "The mission of the department is to evolve a curriculum emphasizing strong engineering fundamentals with flexibility to choose advanced courses, encourage a collaborative teaching-learning process, facilitate digitally-enabled learning, and foster academia-industry partnerships.",
+    "category": "fact",
+    "difficulty": "easy",
+    "document": "Reflection_Jan2026.pdf"
   }
 ]

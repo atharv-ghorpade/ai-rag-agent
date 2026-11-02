@@ -338,49 +338,97 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!md) return 'No answer generated.';
     if (window.marked && typeof window.marked.parse === 'function') {
       try {
+        if (typeof window.marked.setOptions === 'function') {
+          window.marked.setOptions({ gfm: true, breaks: true });
+        }
         return window.marked.parse(md);
       } catch (e) {
         console.warn('Marked parse failed, using fallback:', e);
       }
     }
-    // Fallback parser
-    let html = escapeHtml(md);
-    html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-    html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
-    html = html.replace(/(?:^|\n)[•\-]\s+(.*)/g, '\n<li>$1</li>');
-    html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
-    
-    // Markdown table parser
-    const lines = html.split('\n');
+
+    // Robust Line-by-Line Fallback Markdown Parser
+    const lines = md.split(/\r?\n/);
+    const output = [];
+    let inList = false;
     let inTable = false;
     let tableHtml = '';
-    const output = [];
-    for (let line of lines) {
-      const trimmed = line.trim();
-      if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
-        const cells = trimmed.slice(1, -1).split('|').map(c => c.trim());
-        if (trimmed.includes('---')) continue;
+
+    for (let rawLine of lines) {
+      const line = rawLine.trim();
+
+      // Table row
+      if (line.startsWith('|') && line.endsWith('|')) {
+        if (inList) {
+          output.push('</ul>');
+          inList = false;
+        }
+        if (line.includes('---')) continue;
+        const cells = line.slice(1, -1).split('|').map(c => escapeHtml(c.trim()));
         if (!inTable) {
           inTable = true;
           tableHtml = '<table><thead><tr>' + cells.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody>';
         } else {
           tableHtml += '<tr>' + cells.map(c => `<td>${c}</td>`).join('') + '</tr>';
         }
-      } else {
-        if (inTable) {
-          tableHtml += '</tbody></table>';
-          output.push(tableHtml);
-          inTable = false;
-          tableHtml = '';
-        }
-        output.push(line);
+        continue;
+      } else if (inTable) {
+        tableHtml += '</tbody></table>';
+        output.push(tableHtml);
+        inTable = false;
+        tableHtml = '';
       }
+
+      // Empty line
+      if (!line) {
+        if (inList) {
+          output.push('</ul>');
+          inList = false;
+        }
+        continue;
+      }
+
+      // Headings
+      if (line.startsWith('## ')) {
+        if (inList) {
+          output.push('</ul>');
+          inList = false;
+        }
+        output.push(`<h2>${escapeHtml(line.slice(3).trim())}</h2>`);
+        continue;
+      }
+      if (line.startsWith('# ')) {
+        if (inList) {
+          output.push('</ul>');
+          inList = false;
+        }
+        output.push(`<h1>${escapeHtml(line.slice(2).trim())}</h1>`);
+        continue;
+      }
+
+      // List items (- or • or * or numbers like 1.)
+      const listMatch = line.match(/^([•\-\*]|\d+[\.\)])\s+(.*)/);
+      if (listMatch) {
+        if (!inList) {
+          output.push('<ul>');
+          inList = true;
+        }
+        output.push(`<li>${escapeHtml(listMatch[2])}</li>`);
+        continue;
+      }
+
+      // Regular text paragraph
+      if (inList) {
+        output.push('</ul>');
+        inList = false;
+      }
+      output.push(`<p>${escapeHtml(line)}</p>`);
     }
-    if (inTable) {
-      tableHtml += '</tbody></table>';
-      output.push(tableHtml);
-    }
-    return output.join('<br>').replace(/<br><(h[1-6]|ul|table|tbody|thead|tr)/g, '<$1').replace(/<\/(h[1-6]|ul|table|tbody|thead|tr)><br>/g, '</$1>');
+
+    if (inList) output.push('</ul>');
+    if (inTable) output.push(tableHtml + '</tbody></table>');
+
+    return output.join('\n');
   }
 
 });
