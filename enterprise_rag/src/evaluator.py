@@ -56,10 +56,16 @@ DEFAULT_BENCHMARK_QUERIES = [
         "category": "Admissions Approval"
     },
     {
-        "query": "How many vacation days do employees get?",
-        "ground_truth_keywords": ["20 days", "annual leave", "vacation"],
-        "target_document": "sample_documents.json",
-        "category": "HR Policy"
+        "query": "What is the eligibility for Honours or Minor Degree in Computer Engineering?",
+        "ground_truth_keywords": ["6.75", "CGPA", "80 credits"],
+        "target_document": "BTech_Computer_Engineering_Honours_Minor_R2022.pdf",
+        "category": "Curriculum"
+    },
+    {
+        "query": "Who is the Head of Department of Computer Engineering?",
+        "ground_truth_keywords": ["Ravindra Sangle", "Computer Engineering"],
+        "target_document": "BYTES_Jan2026_Vol17_Issue02.pdf",
+        "category": "Fact"
     }
 ]
 
@@ -254,23 +260,126 @@ class RAGEvaluator:
         print("=" * 80 + "\n")
 
     def run_benchmark(self, queries: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
-        """Backward-compatible benchmark runner for baseline queries."""
+        """
+        Executes comparative quantitative evaluation:
+        Stage 1: Dense Vector Search (Cosine Retrieval)
+        Stage 2: Cross-Encoder Neural Reranking
+        Calculates Hit@1, Hit@3, Hit@5, MRR, and Latencies for both stages.
+        """
         test_queries = queries or DEFAULT_BENCHMARK_QUERIES
-        results = []
-        for q in test_queries:
-            results.append(self.evaluate_query(q))
+        detailed_results = []
 
-        n = len(results)
+        dense_hit1_list = []
+        dense_hit3_list = []
+        dense_hit5_list = []
+        dense_rr_list = []
+        dense_lat_list = []
+
+        rerank_hit1_list = []
+        rerank_hit3_list = []
+        rerank_hit5_list = []
+        rerank_rr_list = []
+        rerank_lat_list = []
+        total_lat_list = []
+
+        for q in test_queries:
+            query_text = q.get("question") or q.get("query")
+            target_doc = (q.get("document") or q.get("target_document") or "").lower()
+            keywords = q.get("ground_truth_keywords") or self._extract_keywords(q.get("answer", ""))
+
+            # --- Stage 1: Dense Vector Search ---
+            t0 = time.perf_counter()
+            dense_results = self.pipeline.retriever._dense_search(query_text, k=10)
+            t_dense = (time.perf_counter() - t0) * 1000.0
+            dense_lat_list.append(t_dense)
+
+            # Determine Dense Rank
+            dense_rank = None
+            for r_idx, d_item in enumerate(dense_results, 1):
+                src = (d_item.get("source_file") or d_item.get("source_pdf") or "").lower()
+                txt = (d_item.get("raw_text") or d_item.get("text") or "").lower()
+                doc_match = bool(target_doc and target_doc in src)
+                kw_match = any(kw.lower() in txt for kw in keywords) if keywords else False
+                if doc_match or kw_match:
+                    dense_rank = r_idx
+                    break
+
+            d_hit1 = 1 if dense_rank == 1 else 0
+            d_hit3 = 1 if (dense_rank and dense_rank <= 3) else 0
+            d_hit5 = 1 if (dense_rank and dense_rank <= 5) else 0
+            d_rr = (1.0 / dense_rank) if dense_rank else 0.0
+
+            dense_hit1_list.append(d_hit1)
+            dense_hit3_list.append(d_hit3)
+            dense_hit5_list.append(d_hit5)
+            dense_rr_list.append(d_rr)
+
+            # --- Stage 2: Cross-Encoder Reranking ---
+            candidate_texts = [item["text"] for item in dense_results]
+            t1 = time.perf_counter()
+            reranked_tuples = self.pipeline.reranker.rerank(query_text, candidate_texts, top_k=4)
+            t_rerank = (time.perf_counter() - t1) * 1000.0
+            t_total = t_dense + t_rerank
+
+            rerank_lat_list.append(t_rerank)
+            total_lat_list.append(t_total)
+
+            text_to_item = {item["text"]: item for item in dense_results}
+            rerank_rank = None
+            for r_idx, (doc_text, score) in enumerate(reranked_tuples, 1):
+                orig_item = text_to_item.get(doc_text, {})
+                src = (orig_item.get("source_file") or orig_item.get("source_pdf") or "").lower()
+                txt = (orig_item.get("raw_text") or doc_text).lower()
+                doc_match = bool(target_doc and target_doc in src)
+                kw_match = any(kw.lower() in txt for kw in keywords) if keywords else False
+                if doc_match or kw_match:
+                    rerank_rank = r_idx
+                    break
+
+            r_hit1 = 1 if rerank_rank == 1 else 0
+            r_hit3 = 1 if (rerank_rank and rerank_rank <= 3) else 0
+            r_hit5 = 1 if (rerank_rank and rerank_rank <= 5) else 0
+            r_rr = (1.0 / rerank_rank) if rerank_rank else 0.0
+
+            rerank_hit1_list.append(r_hit1)
+            rerank_hit3_list.append(r_hit3)
+            rerank_hit5_list.append(r_hit5)
+            rerank_rr_list.append(r_rr)
+
+            detailed_results.append({
+                "query": query_text,
+                "dense_rank": dense_rank,
+                "dense_latency_ms": t_dense,
+                "rerank_rank": rerank_rank,
+                "rerank_latency_ms": t_rerank,
+                "total_latency_ms": t_total,
+                "target_document": target_doc
+            })
+
+        n = len(test_queries) or 1
         summary = {
             "total_queries_evaluated": n,
-            "hit@1_accuracy": sum(r["hit@1"] for r in results) / n,
-            "hit@3_accuracy": sum(r["hit@3"] for r in results) / n,
-            "hit@5_accuracy": sum(r["hit@5"] for r in results) / n,
-            "mean_reciprocal_rank_mrr": sum(r["reciprocal_rank"] for r in results) / n,
-            "average_precision@k": sum(r["precision@k"] for r in results) / n,
-            "average_recall@k": sum(r["recall@k"] for r in results) / n,
-            "average_similarity_score": statistics.mean(r["avg_similarity_score"] for r in results),
-            "average_total_latency_ms": statistics.mean(r["total_latency_ms"] for r in results),
-            "detailed_results": results
+            "dense_search": {
+                "hit@1": sum(dense_hit1_list) / n,
+                "hit@3": sum(dense_hit3_list) / n,
+                "hit@5": sum(dense_hit5_list) / n,
+                "mrr": sum(dense_rr_list) / n,
+                "avg_latency_ms": statistics.mean(dense_lat_list) if dense_lat_list else 0.0
+            },
+            "cross_encoder_reranked": {
+                "hit@1": sum(rerank_hit1_list) / n,
+                "hit@3": sum(rerank_hit3_list) / n,
+                "hit@5": sum(rerank_hit5_list) / n,
+                "mrr": sum(rerank_rr_list) / n,
+                "avg_rerank_latency_ms": statistics.mean(rerank_lat_list) if rerank_lat_list else 0.0,
+                "avg_total_latency_ms": statistics.mean(total_lat_list) if total_lat_list else 0.0
+            },
+            "detailed_results": detailed_results,
+            # Backwards-compatible root fields
+            "hit@1_accuracy": sum(rerank_hit1_list) / n,
+            "hit@3_accuracy": sum(rerank_hit3_list) / n,
+            "hit@5_accuracy": sum(rerank_hit5_list) / n,
+            "mean_reciprocal_rank_mrr": sum(rerank_rr_list) / n,
+            "average_total_latency_ms": statistics.mean(total_lat_list) if total_lat_list else 0.0
         }
         return summary
