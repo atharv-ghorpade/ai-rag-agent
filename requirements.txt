@@ -1,0 +1,20 @@
+# Enterprise RAG - Person 2: Embeddings, Vector Search (FAISS & Qdrant), & Cross-Encoder Reranking
+sentence-transformers>=3.0.0
+torch
+faiss-cpu>=1.8.0
+qdrant-client>=1.10.0
+transformers>=4.40.0
+numpy>=1.24.0
+tqdm>=4.65.0
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+langchain>=0.2.0
+langchain-text-splitters>=0.2.0
+pypdf>=5.0.0
+pymupdf>=1.24.0
+pillow>=10.0.0
+winocr>=0.0.15
+ipykernel>=6.29.0
+jupyter>=1.0.0
+fastapi>=0.110.0
+uvicorn>=0.29.0

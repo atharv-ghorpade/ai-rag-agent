@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise RAG | VIT Admissions Intelligence & Search</title>
+  <meta name="description" content="Enterprise RAG System featuring Dense Cosine Vector Search, Neural Cross-Encoder Reranking, and Strict Grounded Citations.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header class="header">
+    <div class="brand">
+      <div class="brand-logo">VIT</div>
+      <div class="brand-text">
+        <div style="display:flex; align-items:center;">
+          <h1>Enterprise RAG Intelligence</h1>
+          <span class="brand-badge">Person 1 • 2 • 3</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="system-status">
+      <div class="status-pill">
+        <span class="status-indicator"></span>
+        <span id="header-status">Qdrant Online</span>
+      </div>
+      <div class="status-pill">
+        <span style="color:#818cf8;">Chunks:</span>
+        <strong id="header-chunks" style="color:#f9fafb;">447</strong>
+      </div>
+      <div class="status-pill" style="display:none; @media(min-width:768px){display:flex;}">
+        <span style="color:#38bdf8;">Embed:</span>
+        <span id="header-embed">bge-small-en</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs">
+    <button class="tab-btn active" data-tab="tab-qa">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      Q&A Intelligence
+    </button>
+    <button class="tab-btn" data-tab="tab-comparison">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+      Vector vs Reranker Comparison
+    </button>
+    <button class="tab-btn" data-tab="tab-benchmark">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+      Performance Benchmark (MRR / Latency)
+    </button>
+    <button class="tab-btn" data-tab="tab-corpus">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+      Corpus Explorer
+    </button>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="container">
+
+    <!-- TAB 1: Q&A INTELLIGENCE -->
+    <section id="tab-qa" class="tab-content active">
+      <div class="glass-card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            Ask Admission & Policy Records
+          </h2>
+          <span style="font-size:0.8rem; color:var(--text-muted);">Strict Grounding • Verified Citations</span>
+        </div>
+
+        <form id="qa-form">
+          <div class="search-wrapper">
+            <input 
+              type="text" 
+              id="qa-input" 
+              class="search-input" 
+              placeholder="e.g. What is the sanctioned intake and approved students for MMS 2022-23?" 
+              autocomplete="off"
+              required
+            >
+            <button type="submit" id="qa-submit-btn" class="btn-primary">
+              <span id="qa-btn-text">Generate Answer</span>
+              <span id="qa-spinner" class="spinner hidden"></span>
+            </button>
+          </div>
+        </form>
+
+        <div class="chips-container">
+          <span class="chips-label">Try asking:</span>
+          <button class="chip" data-query="Who is the Head of the Information Technology Department?">Head of IT Dept</button>
+          <button class="chip" data-query="Who completed a PhD in Natural Language Processing?">PhD in NLP</button>
+          <button class="chip" data-query="What is the total fee for MMS Institute Level admission?">MMS Admission Fee</button>
+          <button class="chip" data-query="What are the two categories under Institute Level admissions?">ACAP & IL Admissions</button>
+          <button class="chip" data-query="What is the sanctioned intake and approved students for MMS 2022-23?">MMS Intake 2022-23</button>
+          <button class="chip" data-query="What is the approval status for First Year B.E. admissions in 2023-24?">First Year B.E. 2023-24</button>
+        </div>
+
+        <!-- Answer Container -->
+        <div id="qa-result-container" class="answer-box hidden">
+          <div class="answer-header">
+            <div class="answer-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              Grounded Enterprise Answer
+            </div>
+            <span id="qa-latency" style="font-size:0.8rem; color:var(--text-muted); font-family:monospace;">-- ms</span>
+          </div>
+
+          <div id="qa-answer-text" class="answer-body"></div>
+
+          <!-- Citations Section -->
+          <div id="qa-citations-section" class="citations-wrapper">
+            <div class="citations-title">Verified Source Citations (Person 3)</div>
+            <div id="qa-citations-grid" class="citations-grid"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: VECTOR VS RERANKER COMPARISON -->
+    <section id="tab-comparison" class="tab-content">
+      <div class="glass-card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            Stage 1 (Dense Vector) vs Stage 2 (Cross-Encoder)
+          </h2>
+          <span style="font-size:0.8rem; color:var(--text-muted);">Inspect Precision Improvements</span>
+        </div>
+
+        <form id="compare-form">
+          <div class="search-wrapper">
+            <input 
+              type="text" 
+              id="compare-input" 
+              class="search-input" 
+              placeholder="Enter search query to compare retrieval stages..." 
+              required
+            >
+            <button type="submit" id="compare-submit-btn" class="btn-primary">
+              <span id="compare-btn-text">Compare Stages</span>
+              <span id="compare-spinner" class="spinner hidden"></span>
+            </button>
+          </div>
+        </form>
+
+        <div class="chips-container">
+          <span class="chips-label">Compare queries:</span>
+          <button class="chip compare-chip" data-query="How many vacation days do employees get?">Vacation Days</button>
+          <button class="chip compare-chip" data-query="How do I submit business travel expenses?">Travel Expenses</button>
+          <button class="chip compare-chip" data-query="What is the sanctioned intake for MMS for A.Y. 2022-23?">MMS Sanctioned Intake</button>
+        </div>
+
+        <!-- Comparison Side-by-Side Results -->
+        <div id="compare-results" class="comparison-grid hidden">
+          <!-- Stage 1 Column -->
+          <div>
+            <div class="column-header stage1-header">
+              <span>Stage 1: Dense Vector Search (Qdrant)</span>
+              <span id="stage1-count">Top 8</span>
+            </div>
+            <div id="stage1-list" class="result-list"></div>
+          </div>
+
+          <!-- Stage 2 Column -->
+          <div>
+            <div class="column-header stage2-header">
+              <span>Stage 2: Cross-Encoder Reranked</span>
+              <span id="stage2-count">Top 3 Reranked</span>
+            </div>
+            <div id="stage2-list" class="result-list"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: PERFORMANCE BENCHMARK -->
+    <section id="tab-benchmark" class="tab-content">
+      <div class="glass-card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+              Quantitative Evaluation Suite
+            </h2>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.25rem;">
+              Benchmarks MRR (Mean Reciprocal Rank), Hit@K accuracy, and Latency for Person 2 component.
+            </p>
+          </div>
+          <button id="run-benchmark-btn" class="btn-primary">
+            <span id="benchmark-btn-text">Run Full Benchmark</span>
+            <span id="benchmark-spinner" class="spinner hidden"></span>
+          </button>
+        </div>
+
+        <div id="benchmark-results" class="hidden">
+          <!-- Metrics Table -->
+          <table class="metrics-table">
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Stage 1: Dense Vector Search</th>
+                <th>Stage 2: Cross-Encoder Reranked</th>
+                <th>Improvement</th>
+              </tr>
+            </thead>
+            <tbody id="benchmark-metrics-body"></tbody>
+          </table>
+
+          <div style="margin-top:1.5rem;">
+            <h3 style="font-size:0.95rem; font-family:var(--font-heading); color:var(--text-muted); margin-bottom:0.75rem;">
+              Query-Level Breakdown:
+            </h3>
+            <div id="benchmark-queries-breakdown" class="result-list"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: CORPUS EXPLORER -->
+    <section id="tab-corpus" class="tab-content">
+      <div class="glass-card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+              Indexed Admissions & Policy Corpus
+            </h2>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.25rem;">
+              Inspect chunked documents stored in the local Qdrant vector database.
+            </p>
+          </div>
+          <input 
+            type="text" 
+            id="corpus-search" 
+            class="search-input" 
+            placeholder="Filter chunks by keyword..." 
+            style="max-width:320px;"
+          >
+        </div>
+
+        <div id="corpus-list" class="result-list">
+          <div style="text-align:center; padding:2rem; color:var(--text-muted);">Loading indexed documents...</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

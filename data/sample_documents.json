@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "title": "Annual Leave Policy",
+    "category": "HR",
+    "text": "Employees are entitled to 20 days of annual leave."
+  },
+  {
+    "id": 2,
+    "title": "Vacation Entitlement",
+    "category": "HR",
+    "text": "Workers receive twenty days of vacation every year."
+  },
+  {
+    "id": 3,
+    "title": "Health Benefits",
+    "category": "Benefits",
+    "text": "The company provides health insurance to full-time employees."
+  },
+  {
+    "id": 4,
+    "title": "Leave Submission",
+    "category": "HR",
+    "text": "Employees must submit leave requests through the HR portal."
+  },
+  {
+    "id": 5,
+    "title": "Holiday Schedule",
+    "category": "General",
+    "text": "The office is closed on national holidays."
+  },
+  {
+    "id": 6,
+    "title": "Remote Work Policy",
+    "category": "Workplace",
+    "text": "Employees may work remotely up to two days per week with manager approval."
+  },
+  {
+    "id": 7,
+    "title": "Information Security & Passwords",
+    "category": "IT",
+    "text": "All staff must use multi-factor authentication (MFA) and change passwords every 90 days."
+  },
+  {
+    "id": 8,
+    "title": "Expense Reimbursement",
+    "category": "Finance",
+    "text": "Business travel expenses must be submitted within 30 days accompanied by itemized receipts."
+  },
+  {
+    "id": 9,
+    "title": "Equipment & Laptops",
+    "category": "IT",
+    "text": "Company-issued laptops are encrypted and monitored for unauthorized software installations."
+  },
+  {
+    "id": 10,
+    "title": "Parental Leave",
+    "category": "HR",
+    "text": "New parents receive 12 weeks of fully paid parental leave following birth or adoption."
+  }
+]

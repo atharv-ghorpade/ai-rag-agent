@@ -1,5 +1,11 @@
 import os
 
+cache_dir = os.environ.get("HF_HOME", "D:/huggingface_cache")
+try:
+    os.makedirs(cache_dir, exist_ok=True)
+except Exception:
+    pass
+
 from sentence_transformers import CrossEncoder
 
 
@@ -7,18 +13,21 @@ class Reranker:
 
     def __init__(
         self,
-        model_name="BAAI/bge-reranker-v2-m3"
+        model_name=None
     ):
-        print("Loading reranker...")
+        model_name = model_name or os.environ.get("RERANKER_MODEL", "cross-encoder/ms-marco-MiniLM-L-6-v2")
+        print(f"Loading reranker model: {model_name}...")
 
         self.model = CrossEncoder(
             model_name,
-            cache_folder="D:/huggingface_cache"
+            cache_folder=cache_dir
         )
 
-        print("Reranker loaded successfully!")
+        print(f"Reranker model '{model_name}' loaded successfully!")
 
     def rerank(self, query, documents, top_k=3):
+        if not documents:
+            return []
 
         pairs = [
             [query, document]
