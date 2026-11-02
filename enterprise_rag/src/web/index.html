@@ -52,10 +52,6 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
       Vector vs Reranker Comparison
     </button>
-    <button class="tab-btn" data-tab="tab-benchmark">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
-      Performance Benchmark (MRR / Latency)
-    </button>
     <button class="tab-btn" data-tab="tab-corpus">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
       Corpus Explorer
@@ -181,50 +177,7 @@
       </div>
     </section>
 
-    <!-- TAB 3: PERFORMANCE BENCHMARK -->
-    <section id="tab-benchmark" class="tab-content">
-      <div class="glass-card">
-        <div class="card-header">
-          <div>
-            <h2 class="card-title">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
-              Quantitative Evaluation Suite
-            </h2>
-            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.25rem;">
-              Benchmarks MRR (Mean Reciprocal Rank), Hit@K accuracy, and Latency for Person 2 component.
-            </p>
-          </div>
-          <button id="run-benchmark-btn" class="btn-primary">
-            <span id="benchmark-btn-text">Run Full Benchmark</span>
-            <span id="benchmark-spinner" class="spinner hidden"></span>
-          </button>
-        </div>
-
-        <div id="benchmark-results" class="hidden">
-          <!-- Metrics Table -->
-          <table class="metrics-table">
-            <thead>
-              <tr>
-                <th>Metric</th>
-                <th>Stage 1: Dense Vector Search</th>
-                <th>Stage 2: Cross-Encoder Reranked</th>
-                <th>Improvement</th>
-              </tr>
-            </thead>
-            <tbody id="benchmark-metrics-body"></tbody>
-          </table>
-
-          <div style="margin-top:1.5rem;">
-            <h3 style="font-size:0.95rem; font-family:var(--font-heading); color:var(--text-muted); margin-bottom:0.75rem;">
-              Query-Level Breakdown:
-            </h3>
-            <div id="benchmark-queries-breakdown" class="result-list"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 4: CORPUS EXPLORER -->
+    <!-- TAB 3: CORPUS EXPLORER -->
     <section id="tab-corpus" class="tab-content">
       <div class="glass-card">
         <div class="card-header">
@@ -255,6 +208,6 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="/static/app.js?v=2.2"></script>
+  <script src="/static/app.js?v=2.3"></script>
 </body>
 </html>
